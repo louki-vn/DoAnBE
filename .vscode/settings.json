@@ -1,5 +1,9 @@
 {
     "editor.tabCompletion": "on",
     "diffEditor.codeLens": true,
-    "MutableAI.upsell": false
+    "MutableAI.upsell": false,
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.autopep8"
+    },
+    "python.formatting.provider": "none"
 }
