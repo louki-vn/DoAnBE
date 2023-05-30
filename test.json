@@ -1,0 +1,71 @@
+{
+    "Event": {
+        "@xmlns": "http://schemas.microsoft.com/win/2004/08/events/event",
+        "System": {
+            "Provider": {
+                "@Name": "Microsoft-Windows-Security-Auditing",
+                "@Guid": "{54849625-5478-4994-a5ba-3e3b0328c30d}"
+            },
+            "EventID": "4798",
+            "Version": "0",
+            "Level": "0",
+            "Task": "13824",
+            "Opcode": "0",
+            "Keywords": "0x8020000000000000",
+            "TimeCreated": {
+                "@SystemTime": "2023-05-27T11:07:27.0563057Z"
+            },
+            "EventRecordID": "470695",
+            "Correlation": {
+                "@ActivityID": "{b4860852-8edd-0002-c708-86b4dd8ed901}"
+            },
+            "Execution": {
+                "@ProcessID": "680",
+                "@ThreadID": "844"
+            },
+            "Channel": "Security",
+            "Computer": "DESKTOP-1LIHC4I",
+            "Security": null
+        },
+        "EventData": {
+            "Data": [
+                {
+                    "@Name": "TargetUserName",
+                    "#text": "Louki"
+                },
+                {
+                    "@Name": "TargetDomainName",
+                    "#text": "DESKTOP-1LIHC4I"
+                },
+                {
+                    "@Name": "TargetSid",
+                    "#text": "S-1-5-21-2384755564-1941788603-3002086374-1001"
+                },
+                {
+                    "@Name": "SubjectUserSid",
+                    "#text": "S-1-5-21-2384755564-1941788603-3002086374-1001"
+                },
+                {
+                    "@Name": "SubjectUserName",
+                    "#text": "Louki"
+                },
+                {
+                    "@Name": "SubjectDomainName",
+                    "#text": "DESKTOP-1LIHC4I"
+                },
+                {
+                    "@Name": "SubjectLogonId",
+                    "#text": "0x63a1c67"
+                },
+                {
+                    "@Name": "CallerProcessId",
+                    "#text": "0x2b74"
+                },
+                {
+                    "@Name": "CallerProcessName",
+                    "#text": "C:\\Program Files\\Git\\usr\\bin\\sh.exe"
+                }
+            ]
+        }
+    }
+}
