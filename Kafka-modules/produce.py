@@ -13,7 +13,3 @@ my_producer = KafkaProducer(
 #     my_data = {'num': n}
 #     my_producer.send('testnum', value=my_data)
 #     sleep(5)
-for n in range(1):
-    my_data = {'firstName': 'heiu', 'lastName': 'Hiue'}
-    my_producer.send('users', value=my_data)
-    sleep(3)

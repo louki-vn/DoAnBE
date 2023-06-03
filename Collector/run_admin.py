@@ -6,9 +6,16 @@ import xmltodict
 import sys
 import msvcrt
 import pyuac
+from json import dumps
+from kafka import KafkaProducer
+
+my_producer = KafkaProducer(
+    bootstrap_servers=['192.168.0.2:9092'],
+    value_serializer=lambda x: dumps(x).encode('utf-8')
+)
 
 
-event_context = {"info": "this object is always passed to your callback"}
+# event_context = {"info": "this object is always passed to your callback"}
 
 
 def xml_to_json(xml_string):
@@ -71,6 +78,7 @@ def new_logs_event_handler(reason, context, evt):
         file.write(result)
         file.write('\n')
     # parse_XML_log(event=event)
+    my_producer.send('users', value=result)
     print(' - ')
 
     # Make sure all printed text is actually printed to the console now

@@ -1,9 +1,11 @@
-# importing the required modules
-from json import loads
-import json
-from kafka import KafkaConsumer
 from pymongo import MongoClient
-from bson import json_util
+from kafka import KafkaConsumer
+from json import loads
+import parse_XML_log
+import sys
+
+sys.path.insert(0, '/home/louki/Downloads/DoAn/Collector')
+
 
 # generating the Kafka Consumer
 my_consumer = KafkaConsumer(
@@ -15,12 +17,20 @@ my_consumer = KafkaConsumer(
     value_deserializer=lambda x: loads(x.decode('utf-8'))
 )
 
-my_client = MongoClient('192.168.0.2:27017')
-my_collection = my_client.users.users
+
+try:
+    my_client = MongoClient('127.0.0.1', 27017)
+    my_collection = my_client.users.users
+    print("Connected successfully!")
+except:
+    print("Could not connect to MongoDB")
+
 
 for message in my_consumer:
     message = message.value
-    # jArray = json.dumps(message, default=json_util.default)
-    # my_collection.insert_many(jArray)
-    # my_collection.insert_one(message)
-    print(message, " added to ", my_collection)
+    log = parse_XML_log(message)
+    try:
+        my_collection.insert_one(log)
+        print("Data inserted successfull!")
+    except:
+        print("Could not insert into MongoDB!")

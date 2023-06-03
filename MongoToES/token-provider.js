@@ -1,9 +1,9 @@
-const {getCollection} = require("./mongo-client");
+const { getCollection } = require("./mongo-client");
 
 async function getResumetoken(id) {
-  console.log("Getting resume token", {id});
+  console.log("Getting resume token", { id });
   const tokensCollection = await getCollection("tokens");
-  const result = await tokensCollection.findOne({"_id": id});
+  const result = await tokensCollection.findOne({ "_id": id });
   return result ? result.resumeToken : null;
 }
 
@@ -11,10 +11,10 @@ async function saveResumeTaken(resumeToken, id) {
   console.log("Saving resume token");
   const tokensCollection = await getCollection("tokens");
   return tokensCollection.updateOne(
-    {"_id": id},
-    {"$set": {resumeToken, "lastModifiedDate": new Date()}},
-    {"upsert": true}
+    { "_id": id },
+    { "$set": { resumeToken, "lastModifiedDate": new Date() } },
+    { "upsert": true }
   );
 }
 
-module.exports = {getResumetoken, saveResumeTaken};
+module.exports = { getResumetoken, saveResumeTaken };

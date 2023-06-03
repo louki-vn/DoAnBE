@@ -1,5 +1,5 @@
-const {getUpsertChangeStream} = require("./change-identifier");
-const {saveResumeTaken} = require("./token-provider");
+const { getUpsertChangeStream } = require("./change-identifier");
+const { saveResumeTaken } = require("./token-provider");
 
 (async () => {
   const changeStream = await getUpsertChangeStream();
@@ -9,7 +9,7 @@ const {saveResumeTaken} = require("./token-provider");
     console.log("@@@@@@@@@@@@@@@@@@@@");
     await saveResumeTaken(change._id, "SOME_TOKEN_ID");
   });
-  
+
   changeStream.on("error", error => {
     console.error(error);
   });
