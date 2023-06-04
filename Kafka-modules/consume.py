@@ -1,15 +1,11 @@
 from pymongo import MongoClient
 from kafka import KafkaConsumer
 from json import loads
-import parse_XML_log
-import sys
 
-sys.path.insert(0, '/home/louki/Downloads/DoAn/Collector')
-
-
+topic = 'users'
 # generating the Kafka Consumer
 my_consumer = KafkaConsumer(
-    'users',
+    topics=topic,
     bootstrap_servers=['192.168.0.2:9092'],
     auto_offset_reset='earliest',
     enable_auto_commit=True,
@@ -28,9 +24,8 @@ except:
 
 for message in my_consumer:
     message = message.value
-    log = parse_XML_log(message)
     try:
-        my_collection.insert_one(log)
+        my_collection.insert_one(message)
         print("Data inserted successfull!")
     except:
-        print("Could not insert into MongoDB!")
+        print("Could not insert into database!")

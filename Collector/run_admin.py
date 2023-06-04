@@ -1,27 +1,44 @@
+from configparser import ConfigParser
+from time import sleep
 import win32evtlog
 import sys
 from xml.etree import ElementTree as ET
 import json
 import xmltodict
-import sys
 import msvcrt
 import pyuac
 from json import dumps
 from kafka import KafkaProducer
-
-my_producer = KafkaProducer(
-    bootstrap_servers=['192.168.0.2:9092'],
-    value_serializer=lambda x: dumps(x).encode('utf-8')
-)
+import os
+import win32con
 
 
 # event_context = {"info": "this object is always passed to your callback"}
+
+def read_config(file_name):
+    data = {}
+    config = ConfigParser()
+    config.read(filenames=file_name)  # reading config from file
+    data['topic_name'] = config.get('kafka', 'topic_name')
+    data['bootstrap_servers'] = config.get('kafka', 'bootstrap_servers')
+    data['group_id'] = config.get('kafka', 'group_id')
+    data['auto_offset_reset'] = config.get('kafka', 'auto_offset_reset')
+    data['enable_auto_commit'] = config.get('kafka', 'enable_auto_commit')
+
+    return data
 
 
 def xml_to_json(xml_string):
     xml_dict = xmltodict.parse(xml_string)
     json_data = json.dumps(xml_dict)
     return json_data
+
+
+evt_dict = {win32con.EVENTLOG_AUDIT_FAILURE: 'EVENTLOG_AUDIT_FAILURE',
+            win32con.EVENTLOG_AUDIT_SUCCESS: 'EVENTLOG_AUDIT_SUCCESS',
+            win32con.EVENTLOG_INFORMATION_TYPE: 'EVENTLOG_INFORMATION_TYPE',
+            win32con.EVENTLOG_WARNING_TYPE: 'EVENTLOG_WARNING_TYPE',
+            win32con.EVENTLOG_ERROR_TYPE: 'EVENTLOG_ERROR_TYPE'}
 
 
 def parse_XML_log(event):
@@ -43,6 +60,11 @@ def parse_XML_log(event):
                 elif e_id.tag == f"{ns}Execution":
                     data["ProcessID"] = e_id.attrib.get('ProcessID')
                     data["ThreadID"] = e_id.attrib.get('ThreadID')
+                elif e_id.tag == f"{ns}EventType":
+                    if not e_id.text in evt_dict.keys():
+                        data['EventType'] = "unknown"
+                    else:
+                        data['EventType'] = str(evt_dict[e_id.text])
                 else:
                     att = e_id.tag.replace(f"{ns}", "")
                     data[att] = e_id.text
@@ -73,13 +95,12 @@ def new_logs_event_handler(reason, context, evt):
 
     event = win32evtlog.EvtRender(evt, win32evtlog.EvtRenderEventXml)
     result = " ".join(l.strip() for l in event.splitlines())
-    # print(result)
+    log = parse_XML_log(event=result)
     with open('xml_logs_test.txt', 'a') as file:
-        file.write(result)
+        file.write(log)
         file.write('\n')
-    # parse_XML_log(event=event)
-    my_producer.send('users', value=result)
-    print(' - ')
+    # my_producer.send('users', value=result)
+    print(' New log record! ')
 
     # Make sure all printed text is actually printed to the console now
     sys.stdout.flush()
@@ -87,6 +108,9 @@ def new_logs_event_handler(reason, context, evt):
 
 
 def main():
+    kafka_config = read_config('../kafka_config.ini')
+    producer = KafkaProducer(bootstrap_servers=kafka_config['bootstrap_servers'],
+                             value_serializer=lambda x: dumps(x).encode('utf-8'))
     print('Hello - Welcome to my Windows Logs Collector!!!')
     subscription1 = win32evtlog.EvtSubscribe('application', win32evtlog.EvtSubscribeToFutureEvents,
                                              None, Callback=new_logs_event_handler, Context=event_context, Query=None)
@@ -95,6 +119,12 @@ def main():
     subscription3 = win32evtlog.EvtSubscribe('Security', win32evtlog.EvtSubscribeToFutureEvents,
                                              None, Callback=new_logs_event_handler, Context=event_context, Query=None)
     while True:
+        sleep(10)
+        os.rename('xml_logs_test.txt', 'xml_logs_done.txt')
+        with open('xml_logs_done.txt', 'r') as f:
+            data = f.readlines()
+            producer.send(topic=kafka_config['topic_name'], value=data)
+
         if msvcrt.kbhit() and msvcrt.getch() == chr(27).encode():
             break
 
