@@ -123,7 +123,7 @@ def new_logs_event_handler(reason, context, evt):
     result = " ".join(l.strip() for l in event.splitlines())
     log = parse_XML_log(event=result)
     with open('xml_logs_test.txt', 'a') as file:
-        file.write(log)
+        file.write(str(log))
         file.write('\n')
     # my_producer.send('users', value=result)
     print(' New log record! ')
@@ -146,13 +146,15 @@ def main():
                                              None, Callback=new_logs_event_handler, Context=event_context, Query=None)
     while True:
         sleep(10)
-        os.rename('xml_logs_test.txt', 'xml_logs_done.txt')
-        with open('xml_logs_done.txt', 'r') as f:
-            data = f.readlines()
-            producer.send(topic=kafka_config['topic_name'], value=data)
-
-        if msvcrt.kbhit() and msvcrt.getch() == chr(27).encode():
-            break
+        try:
+            os.rename('xml_logs_test.txt', 'xml_logs_done.txt')
+            with open('xml_logs_done.txt', 'r') as f:
+                data = f.readlines()
+                producer.send(topic=kafka_config['topic_name'], value=data)
+            os.remove('xml_logs_done.txt')
+        except:
+            if msvcrt.kbhit() and msvcrt.getch() == chr(27).encode():
+                break
 
 
 if __name__ == "__main__":
