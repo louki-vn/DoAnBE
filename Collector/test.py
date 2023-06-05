@@ -6,7 +6,7 @@ from json import dumps
 def read_config():
     data = {}
     config = ConfigParser()
-    config.read('../kafka_config.ini')  # reading config from file
+    config.read('../kafka_config.ini')
     data['topic_name'] = config.get('kafka', 'topic_name')
     data['bootstrap_servers'] = config.get('kafka', 'bootstrap_servers')
     data['group_id'] = config.get('kafka', 'group_id')
@@ -16,7 +16,6 @@ def read_config():
     return data
 
 
-# producer = KafkaProducer(read_config())
 kafka_config = read_config()
 producer = KafkaProducer(
     bootstrap_servers=kafka_config['bootstrap_servers'], value_serializer=lambda x: dumps(x).encode('utf-8'))

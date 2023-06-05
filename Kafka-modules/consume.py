@@ -1,22 +1,37 @@
+from configparser import ConfigParser
 from pymongo import MongoClient
 from kafka import KafkaConsumer
 from json import loads
 
-topic = 'users'
+
+def read_config():
+    data = {}
+    config = ConfigParser()
+    config.read('../kafka_config.ini')
+    data['topic_name'] = config.get('kafka', 'topic_name')
+    data['bootstrap_servers'] = config.get('kafka', 'bootstrap_servers')
+    data['group_id'] = config.get('kafka', 'group_id')
+    data['auto_offset_reset'] = config.get('kafka', 'auto_offset_reset')
+    data['enable_auto_commit'] = config.get('kafka', 'enable_auto_commit')
+
+    return data
+
+
+kafka_config = read_config()
 # generating the Kafka Consumer
 my_consumer = KafkaConsumer(
-    topics=topic,
-    bootstrap_servers=['192.168.0.2:9092'],
-    auto_offset_reset='earliest',
-    enable_auto_commit=True,
-    group_id='my-group',
+    topics=kafka_config['topic_name'],
+    bootstrap_servers=kafka_config['bootstrap_servers'],
+    auto_offset_reset=kafka_config['auto_offset_reset'],
+    enable_auto_commit=kafka_config['enable_auto_commit'],
+    group_id=kafka_config['group_id'],
     value_deserializer=lambda x: loads(x.decode('utf-8'))
 )
 
 
 try:
     my_client = MongoClient('127.0.0.1', 27017)
-    my_collection = my_client.users.users
+    my_collection = my_client.my_application.users
     print("Connected successfully!")
 except:
     print("Could not connect to MongoDB")

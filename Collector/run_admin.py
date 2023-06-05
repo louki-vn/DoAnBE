@@ -10,10 +10,10 @@ import pyuac
 from json import dumps
 from kafka import KafkaProducer
 import os
-import win32con
 
 
-# event_context = {"info": "this object is always passed to your callback"}
+event_context = {"info": "this object is always passed to your callback"}
+
 
 def read_config(file_name):
     data = {}
@@ -34,14 +34,35 @@ def xml_to_json(xml_string):
     return json_data
 
 
-evt_dict = {win32con.EVENTLOG_AUDIT_FAILURE: 'EVENTLOG_AUDIT_FAILURE',
-            win32con.EVENTLOG_AUDIT_SUCCESS: 'EVENTLOG_AUDIT_SUCCESS',
-            win32con.EVENTLOG_INFORMATION_TYPE: 'EVENTLOG_INFORMATION_TYPE',
-            win32con.EVENTLOG_WARNING_TYPE: 'EVENTLOG_WARNING_TYPE',
-            win32con.EVENTLOG_ERROR_TYPE: 'EVENTLOG_ERROR_TYPE'}
+evt_level_dict = {0: 'LogAlways',
+                  1: 'Critical',
+                  2: 'Error',
+                  3: 'Warning',
+                  4: 'Informational',
+                  5: 'Verbose'}
+
+evt_opcode_dict = {0: 'Info',
+                   1: 'Start',
+                   2: 'Stop',
+                   3: 'DataCollectionStart',
+                   4: 'DataCollectionStop',
+                   5: 'Extension',
+                   6: 'Reply',
+                   7: 'Resume',
+                   8: 'Suspend',
+                   9: 'Send',
+                   240: 'Receive'}
 
 
 def parse_XML_log(event):
+    """"Parse a Windows event log entry in XML format into a dictionary of properties. 
+
+    Args:
+        event (string): The XML string representing the Windows event log entry.
+
+    Returns:
+        dict: A dictionary of properties extracted from the XML string.
+    """
     tree = ET.ElementTree(ET.fromstring(event))
     root = tree.getroot()
     ns = "{http://schemas.microsoft.com/win/2004/08/events/event}"
@@ -60,11 +81,16 @@ def parse_XML_log(event):
                 elif e_id.tag == f"{ns}Execution":
                     data["ProcessID"] = e_id.attrib.get('ProcessID')
                     data["ThreadID"] = e_id.attrib.get('ThreadID')
-                elif e_id.tag == f"{ns}EventType":
-                    if not e_id.text in evt_dict.keys():
-                        data['EventType'] = "unknown"
+                elif e_id.tag == f"{ns}Level":
+                    if not int(e_id.text) in evt_level_dict.keys():
+                        data['Level'] = "unknown"
                     else:
-                        data['EventType'] = str(evt_dict[e_id.text])
+                        data['Level'] = evt_level_dict[int(e_id.text)]
+                elif e_id.tag == f"{ns}Opcode":
+                    if not int(e_id.text) in evt_opcode_dict.keys():
+                        data['Opcode'] = "unknown"
+                    else:
+                        data['Opcode'] = evt_opcode_dict[int(e_id.text)]
                 else:
                     att = e_id.tag.replace(f"{ns}", "")
                     data[att] = e_id.text
