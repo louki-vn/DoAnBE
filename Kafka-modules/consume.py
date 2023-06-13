@@ -20,7 +20,7 @@ def read_config():
 kafka_config = read_config()
 # generating the Kafka Consumer
 my_consumer = KafkaConsumer(
-    topics=kafka_config['topic_name'],
+    kafka_config['topic_name'],
     bootstrap_servers=kafka_config['bootstrap_servers'],
     auto_offset_reset=kafka_config['auto_offset_reset'],
     enable_auto_commit=kafka_config['enable_auto_commit'],

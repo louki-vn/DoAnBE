@@ -16,6 +16,14 @@ event_context = {"info": "this object is always passed to your callback"}
 
 
 def read_config(file_name):
+    """Read kafka file config 
+
+    Args:
+        file_name (string): path to file config
+
+    Returns:
+        _type_: _description_
+    """
     data = {}
     config = ConfigParser()
     config.read(filenames=file_name)  # reading config from file
@@ -29,6 +37,14 @@ def read_config(file_name):
 
 
 def xml_to_json(xml_string):
+    """Convert XML tring to JSON format
+
+    Args:
+        xml_string (string): XML string
+
+    Returns:
+        _type_: _description_
+    """
     xml_dict = xmltodict.parse(xml_string)
     json_data = json.dumps(xml_dict)
     return json_data
@@ -108,9 +124,14 @@ def parse_XML_log(event):
     return data
 
 
+kafka_config = read_config('../kafka_config.ini')
+my_producer = KafkaProducer(bootstrap_servers=kafka_config['bootstrap_servers'],
+                            value_serializer=lambda x: dumps(x).encode('utf-8'))
+
+
 def new_logs_event_handler(reason, context, evt):
     """
-    Called when new events are logged.
+    Called when new events are logged. Send processed data to Kafka.
 
     reason - reason the event was logged?
     context - context the event handler was registered with
@@ -122,10 +143,11 @@ def new_logs_event_handler(reason, context, evt):
     event = win32evtlog.EvtRender(evt, win32evtlog.EvtRenderEventXml)
     result = " ".join(l.strip() for l in event.splitlines())
     log = parse_XML_log(event=result)
-    with open('xml_logs_test.txt', 'a') as file:
-        file.write(str(log))
-        file.write('\n')
-    # my_producer.send('users', value=result)
+    # with open('xml_logs_test.txt', 'a') as file:
+    #     file.write(str(log))
+    #     file.write('\n')
+    my_producer.send('users', value=log)
+    # my_producer.send('users', value=json.dumps(log))
     print(' New log record! ')
 
     # Make sure all printed text is actually printed to the console now
@@ -134,9 +156,9 @@ def new_logs_event_handler(reason, context, evt):
 
 
 def main():
-    kafka_config = read_config('../kafka_config.ini')
-    producer = KafkaProducer(bootstrap_servers=kafka_config['bootstrap_servers'],
-                             value_serializer=lambda x: dumps(x).encode('utf-8'))
+    """
+        Generate Windows event logs subscriber for channels
+    """
     print('Hello - Welcome to my Windows Logs Collector!!!')
     subscription1 = win32evtlog.EvtSubscribe('application', win32evtlog.EvtSubscribeToFutureEvents,
                                              None, Callback=new_logs_event_handler, Context=event_context, Query=None)
@@ -145,19 +167,17 @@ def main():
     subscription3 = win32evtlog.EvtSubscribe('Security', win32evtlog.EvtSubscribeToFutureEvents,
                                              None, Callback=new_logs_event_handler, Context=event_context, Query=None)
     while True:
-        sleep(10)
         try:
-            os.rename('xml_logs_test.txt', 'xml_logs_done.txt')
-            with open('xml_logs_done.txt', 'r') as f:
-                data = f.readlines()
-                producer.send(topic=kafka_config['topic_name'], value=data)
-            os.remove('xml_logs_done.txt')
+            sleep(1)
         except:
             if msvcrt.kbhit() and msvcrt.getch() == chr(27).encode():
                 break
 
 
 if __name__ == "__main__":
+    """
+        If the program does not run with admin privileges, rerun and prompt for admin privileges.
+    """
     if not pyuac.isUserAdmin():
         print("Re-launching as admin!")
 
