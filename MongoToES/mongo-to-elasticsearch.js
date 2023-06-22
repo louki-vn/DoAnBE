@@ -1,6 +1,31 @@
 const { getUpsertChangeStream, getDeleteChangeStream } = require("./change-identifier");
 const { saveResumeTaken } = require("./token-provider");
 const client = require("./elastic-client");
+const config = require('./config');
+
+const index = config.es_index;
+const type = config.es_type;
+
+async function CheckIndex() {
+  let exists = false;
+  try {
+    console.log('Checking Index:', index);
+    const existsResponse = await client.indices.exists({ index });
+    exists = existsResponse.body;
+  } catch (e) {
+    console.log('error', e);
+  }
+
+  if (exists) {
+    console.log('Index exist!');
+    return;
+  }
+  client.indices.create({ index });
+  //  createCarMapping(client, index, type);
+  console.log('Created new Index!');
+}
+
+CheckIndex();
 
 (async () => {
   const upsertChangeStream = await getUpsertChangeStream();
@@ -10,9 +35,9 @@ const client = require("./elastic-client");
     Reflect.deleteProperty(change.fullDocument, "_id");
     const response = await client.index({
       "id": change.fullDocument.id,
-      "index": "my_application",
+      "index": index,
       "body": change.fullDocument,
-      "type": "_doc"
+      "type": type
     });
     console.log("document upserted successsfully with status code", response.statusCode);
     await saveResumeTaken(change._id, "SOME_UPSERT_TOKEN_ID");
@@ -27,8 +52,8 @@ const client = require("./elastic-client");
     console.log("Deleting data from elasticsearch with id", change.documentKey._id);
     const response = await client.delete({
       "id": change.documentKey._id,
-      "index": "my_application",
-      "type": "_doc"
+      "index": index,
+      "type": type
     });
     console.log("document deleted successsfully with status code", response.statusCode);
     await saveResumeTaken(change._id, "SOME_DELETE_TOKEN_ID");

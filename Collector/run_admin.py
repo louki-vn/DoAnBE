@@ -9,6 +9,7 @@ import msvcrt
 import pyuac
 from json import dumps
 from kafka import KafkaProducer
+import dateutil.parser
 import os
 
 
@@ -91,7 +92,8 @@ def parse_XML_log(event):
                 elif e_id.tag == f"{ns}Provider":
                     data["Provider"] = e_id.attrib.get('Name')
                 elif e_id.tag == f"{ns}TimeCreated":
-                    data["TimeCreated"] = e_id.attrib.get('SystemTime')
+                    data["TimeCreated"] = dateutil.parser.isoparse(
+                        e_id.attrib.get('SystemTime')).strftime('%Y-%m-%d %H:%M:%S')
                 elif e_id.tag == f"{ns}Correlation":
                     data["ActivityID"] = e_id.attrib.get('ActivityID')
                 elif e_id.tag == f"{ns}Execution":
@@ -143,12 +145,11 @@ def new_logs_event_handler(reason, context, evt):
     event = win32evtlog.EvtRender(evt, win32evtlog.EvtRenderEventXml)
     result = " ".join(l.strip() for l in event.splitlines())
     log = parse_XML_log(event=result)
-    # with open('xml_logs_test.txt', 'a') as file:
-    #     file.write(str(log))
-    #     file.write('\n')
-    my_producer.send('users', value=log)
-    # my_producer.send('users', value=json.dumps(log))
-    print(' New log record! ')
+    try:
+        my_producer.send('users', value=log)
+        print(' New log record! ')
+    except:
+        print('Can not sent to server!')
 
     # Make sure all printed text is actually printed to the console now
     sys.stdout.flush()
@@ -180,7 +181,6 @@ if __name__ == "__main__":
     """
     if not pyuac.isUserAdmin():
         print("Re-launching as admin!")
-
         pyuac.runAsAdmin()
         input("Press enter to close the window. >")
     else:

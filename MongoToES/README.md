@@ -1,11 +1,7 @@
-# mongodb-change-streams
-
-This is demo code for mongodb change streams and how it can be used to stream the data from mongodb to elasticsearch.
-
 ### Prerequisites
 
-- Install Mongodb 3.6 or more in replica set mode. Create a db called `testDb`.
-- Install Elasticsearch listening on `http://localhost:9200`. I am using version 6 but any version can be used.
+- Install Mongodb 3.6 or more in replica set mode.
+- Install Elasticsearch listening on `http://localhost:9200`.
 
 ## How to install?
 

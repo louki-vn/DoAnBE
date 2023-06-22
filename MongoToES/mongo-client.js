@@ -1,5 +1,7 @@
 const mongodbClient = require("mongodb").MongoClient;
-const connectionString = "mongodb://localhost:27017/my_application"
+const config = require('./config');
+
+const connectionString = `mongodb://${config.db_host}:${config.db_port}/${config.db_collection}`
 let client;
 
 async function getDb() {

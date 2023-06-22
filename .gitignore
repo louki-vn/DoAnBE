@@ -1,0 +1,6 @@
+
+/node_modules
+/MongoToES/node_modules
+/MongoToES/.env
+.vscode
+.env
