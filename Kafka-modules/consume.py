@@ -28,19 +28,24 @@ my_consumer = KafkaConsumer(
     value_deserializer=lambda x: loads(x.decode('utf-8'))
 )
 
-
-try:
-    my_client = MongoClient('127.0.0.1', 27017)
-    my_collection = my_client.my_application.users
-    print("Connected successfully!")
-except:
-    print("Could not connect to MongoDB")
+connectString = '127.0.0.1:27017/'
 
 
-for message in my_consumer:
-    message = message.value
+def ConnectDB(connectString):
     try:
-        my_collection.insert_one(message)
-        print("Data inserted successfull!")
+        my_client = MongoClient(connectString)
+        my_collection = my_client.my_application.users
+        print("Connected successfully!")
+        return my_collection
     except:
-        print("Could not insert into database!")
+        print("Could not connect to MongoDB")
+
+
+def InsertDataToDB(consumer, collection):
+    for message in consumer:
+        message = message.value
+        try:
+            collection.insert_one(message)
+            print("Data inserted successfull!")
+        except:
+            print("Could not insert into database!")

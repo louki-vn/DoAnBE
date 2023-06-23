@@ -7,7 +7,7 @@ let client;
 async function getDb() {
   if (!client || !client.isConnected()) {
     client = await mongodbClient.connect(connectionString, { "useNewUrlParser": true, "useUnifiedTopology": true });
-    console.log("connected successfully!!");
+    console.log("Connected to Database successfully!!");
   }
   return client.db();
 }

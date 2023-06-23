@@ -92,8 +92,7 @@ def parse_XML_log(event):
                 elif e_id.tag == f"{ns}Provider":
                     data["Provider"] = e_id.attrib.get('Name')
                 elif e_id.tag == f"{ns}TimeCreated":
-                    data["TimeCreated"] = dateutil.parser.isoparse(
-                        e_id.attrib.get('SystemTime')).strftime('%Y-%m-%d %H:%M:%S')
+                    data["TimeCreated"] = e_id.attrib.get('SystemTime')
                 elif e_id.tag == f"{ns}Correlation":
                     data["ActivityID"] = e_id.attrib.get('ActivityID')
                 elif e_id.tag == f"{ns}Execution":

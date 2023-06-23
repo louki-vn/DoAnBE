@@ -1,31 +1,13 @@
 const { getUpsertChangeStream, getDeleteChangeStream } = require("./change-identifier");
 const { saveResumeTaken } = require("./token-provider");
-const client = require("./elastic-client");
+const {client, CheckIndex} = require("./elastic-client");
 const config = require('./config');
+
 
 const index = config.es_index;
 const type = config.es_type;
 
-async function CheckIndex() {
-  let exists = false;
-  try {
-    console.log('Checking Index:', index);
-    const existsResponse = await client.indices.exists({ index });
-    exists = existsResponse.body;
-  } catch (e) {
-    console.log('error', e);
-  }
-
-  if (exists) {
-    console.log('Index exist!');
-    return;
-  }
-  client.indices.create({ index });
-  //  createCarMapping(client, index, type);
-  console.log('Created new Index!');
-}
-
-CheckIndex();
+CheckIndex(index);
 
 (async () => {
   const upsertChangeStream = await getUpsertChangeStream();
