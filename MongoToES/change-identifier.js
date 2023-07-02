@@ -1,11 +1,8 @@
 const { getCollection } = require("./mongo-client");
 const { getResumetoken } = require("./token-provider");
-const config = require('./config');
 
 
-const collection = config.db_collection;
-
-async function getUpsertChangeStream() {
+async function getUpsertChangeStream(collection) {
   console.log("@@@@@@@@@@@@@@@@@@@@");
   const resumeToken = await getResumetoken("SOME_UPSERT_TOKEN_ID");
   console.log("resumeToken", resumeToken);
@@ -27,7 +24,7 @@ async function getUpsertChangeStream() {
   return changeStream;
 }
 
-async function getDeleteChangeStream() {
+async function getDeleteChangeStream(collection) {
   console.log("@@@@@@@@@@@@@@@@@@@@");
   const resumeToken = await getResumetoken("SOME_DELETE_TOKEN_ID");
   console.log("resumeToken", resumeToken);

@@ -6,11 +6,13 @@ const config = require('./config');
 
 const index = config.es_index;
 const type = config.es_type;
+const collection = config.db_collection;
 
-CheckIndex(index);
+CheckIndex(collection, index);
+
 
 (async () => {
-  const upsertChangeStream = await getUpsertChangeStream();
+  const upsertChangeStream = await getUpsertChangeStream(collection);
   upsertChangeStream.on("change", async change => {
     console.log("Pushing data to elasticsearch with id", change.fullDocument._id);
     change.fullDocument.id = change.fullDocument._id;
@@ -21,7 +23,8 @@ CheckIndex(index);
       "body": change.fullDocument,
       "type": type
     });
-    console.log("document upserted successsfully with status code", response.statusCode);
+    // console.log(response)
+    console.log("document ", response.result);
     await saveResumeTaken(change._id, "SOME_UPSERT_TOKEN_ID");
   });
 
@@ -29,7 +32,7 @@ CheckIndex(index);
     console.error(error);
   });
 
-  const deleteChangeStream = await getDeleteChangeStream();
+  const deleteChangeStream = await getDeleteChangeStream(collection);
   deleteChangeStream.on("change", async change => {
     console.log("Deleting data from elasticsearch with id", change.documentKey._id);
     const response = await client.delete({
@@ -37,7 +40,8 @@ CheckIndex(index);
       "index": index,
       "type": type
     });
-    console.log("document deleted successsfully with status code", response.statusCode);
+    // console.log(response)
+    console.log("document ", response.result);
     await saveResumeTaken(change._id, "SOME_DELETE_TOKEN_ID");
   });
 

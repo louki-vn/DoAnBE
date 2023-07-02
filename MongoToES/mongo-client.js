@@ -1,11 +1,11 @@
 const mongodbClient = require("mongodb").MongoClient;
 const config = require('./config');
 
-const connectionString = `mongodb://${config.db_host}:${config.db_port}/${config.db_collection}`
+const connectionString = `mongodb://${config.db_host}:${config.db_port}/${config.db_collection}?directConnection=true`
 let client;
 
 async function getDb() {
-  if (!client || !client.isConnected()) {
+  if (!client ) {
     client = await mongodbClient.connect(connectionString, { "useNewUrlParser": true, "useUnifiedTopology": true });
     console.log("Connected to Database successfully!!");
   }

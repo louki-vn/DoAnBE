@@ -14,7 +14,7 @@ module.exports= {
 };
 
 if (result.error) {
-  console.log(result.error, "[Error Parsing env variables!]");
+  console.log(result.error, "[Error Parsing env variables! Missing file .env or something else.]");
   throw result.error;
 };
 
