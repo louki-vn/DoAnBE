@@ -17,24 +17,24 @@ def read_config():
     return data
 
 
-kafka_config = read_config()
-# generating the Kafka Consumer
-my_consumer = KafkaConsumer(
-    kafka_config['topic_name'],
-    bootstrap_servers=kafka_config['bootstrap_servers'],
-    auto_offset_reset=kafka_config['auto_offset_reset'],
-    enable_auto_commit=kafka_config['enable_auto_commit'],
-    group_id=kafka_config['group_id'],
-    value_deserializer=lambda x: loads(x.decode('utf-8'))
-)
+# kafka_config = read_config()
+# # generating the Kafka Consumer
+# my_consumer = KafkaConsumer(
+#     kafka_config['topic_name'],
+#     bootstrap_servers=kafka_config['bootstrap_servers'],
+#     auto_offset_reset=kafka_config['auto_offset_reset'],
+#     enable_auto_commit=kafka_config['enable_auto_commit'],
+#     group_id=kafka_config['group_id'],
+#     value_deserializer=lambda x: loads(x.decode('utf-8'))
+# )
 
-connectString = '127.0.0.1:27017/'
+connectString = 'mongodb://10.8.0.3:27021/?directConnection=true'
 
 
 def ConnectDB(connectString):
     try:
         my_client = MongoClient(connectString)
-        my_collection = my_client.my_application.users
+        my_collection = my_client.test.test
         print("Connected successfully!")
         return my_collection
     except:

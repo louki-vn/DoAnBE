@@ -4,3 +4,4 @@
 /MongoToES/.env
 .vscode
 .env
+.kafka-config.ini
