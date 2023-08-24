@@ -5,3 +5,4 @@
 .vscode
 .env
 .kafka-config.ini
+/MongoToES/package-lock.json

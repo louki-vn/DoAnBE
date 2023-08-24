@@ -211,7 +211,7 @@ def new_logs_event_handler(reason, context, evt):
     log['IP'] = IP
     try:
         my_producer.send('windows', value=log)
-        print(' New log record! ')
+        print(log)
     except:
         print('Can not sent to server!')
 
@@ -227,8 +227,8 @@ def main():
     print('Hello - Welcome to my Windows Logs Collector!!!')
     # subscription1 = win32evtlog.EvtSubscribe('application', win32evtlog.EvtSubscribeToFutureEvents,
     #                                          None, Callback=new_logs_event_handler, Context=event_context, Query=None)
-    # subscription2 = win32evtlog.EvtSubscribe('system', win32evtlog.EvtSubscribeToFutureEvents,
-    #                                          None, Callback=new_logs_event_handler, Context=event_context, Query=None)
+    subscription2 = win32evtlog.EvtSubscribe('system', win32evtlog.EvtSubscribeToFutureEvents,
+                                             None, Callback=new_logs_event_handler, Context=event_context, Query=None)
     subscription3 = win32evtlog.EvtSubscribe('Security', win32evtlog.EvtSubscribeToFutureEvents,
                                              None, Callback=new_logs_event_handler, Context=event_context, Query=None)
     subscription4 = win32evtlog.EvtSubscribe('Microsoft-Windows-Windows Defender/Operational', win32evtlog.EvtSubscribeToFutureEvents,

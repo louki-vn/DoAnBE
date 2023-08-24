@@ -1,7 +1,7 @@
 {
   "name": "mongodb-change-streams",
   "version": "1.0.0",
-  "description": "MongoDb Change Streams example",
+  "description": "MongoDb Change Streams",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -16,8 +16,8 @@
     "streams",
     "mongo"
   ],
-  "author": "Ashish Modi",
-  "license": "MIT",
+  "author": "Louki",
+  "license": "Louki",
   "bugs": {
     "url": "https://github.com/montumodi/mongodb-change-streams/issues"
   },
@@ -25,6 +25,7 @@
   "dependencies": {
     "@elastic/elasticsearch": "^8.8.1",
     "dotenv": "^16.3.1",
+    "elastic-builder": "^2.21.0",
     "mongodb": "^5.6.0",
     "readline-sync": "^1.4.10"
   },
