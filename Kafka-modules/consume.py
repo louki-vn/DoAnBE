@@ -17,35 +17,32 @@ def read_config():
     return data
 
 
-# kafka_config = read_config()
-# # generating the Kafka Consumer
-# my_consumer = KafkaConsumer(
-#     kafka_config['topic_name'],
-#     bootstrap_servers=kafka_config['bootstrap_servers'],
-#     auto_offset_reset=kafka_config['auto_offset_reset'],
-#     enable_auto_commit=kafka_config['enable_auto_commit'],
-#     group_id=kafka_config['group_id'],
-#     value_deserializer=lambda x: loads(x.decode('utf-8'))
-# )
+kafka_config = read_config()
+# generating the Kafka Consumer
+my_consumer = KafkaConsumer(
+    kafka_config['topic_name'],
+    bootstrap_servers=kafka_config['bootstrap_servers'],
+    auto_offset_reset=kafka_config['auto_offset_reset'],
+    enable_auto_commit=kafka_config['enable_auto_commit'],
+    group_id=kafka_config['group_id'],
+    value_deserializer=lambda x: loads(x.decode('utf-8'))
+)
 
 connectString = 'mongodb://10.8.0.3:27021/?directConnection=true'
 
 
-def ConnectDB(connectString):
+try:
+    my_client = MongoClient(connectString)
+    my_collection = my_client.test.test
+    print("Connected successfully!")
+except:
+    print("Could not connect to MongoDB")
+
+
+for message in my_consumer:
+    message = message.value
     try:
-        my_client = MongoClient(connectString)
-        my_collection = my_client.test.test
-        print("Connected successfully!")
-        return my_collection
+        my_collection.insert_one(message)
+        print("Data inserted successfull!")
     except:
-        print("Could not connect to MongoDB")
-
-
-def InsertDataToDB(consumer, collection):
-    for message in consumer:
-        message = message.value
-        try:
-            collection.insert_one(message)
-            print("Data inserted successfull!")
-        except:
-            print("Could not insert into database!")
+        print("Could not insert into database!")
